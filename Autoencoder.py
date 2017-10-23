@@ -13,7 +13,7 @@ mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
 # Network Parameters
 feature_hidden_1 = 256 # 1st layer features
 feature_hidden_2 = 128 # 2nd layer features
-feature_hidden_3 = 64 # 3nd layer features
+#feature_hidden_3 = 64 # 3nd layer features
 feature_input = 784 # MNIST image feature set is 28 X 28
 
 # tf Graph input (only pictures)
@@ -22,16 +22,16 @@ X = tf.placeholder("float", [None, feature_input])
 weights_layers = {
     'encoder_h1': tf.Variable(tf.random_normal([feature_input, feature_hidden_1])),
     'encoder_h2': tf.Variable(tf.random_normal([feature_hidden_1, feature_hidden_2])),
-    'encoder_h3': tf.Variable(tf.random_normal([feature_hidden_2, feature_hidden_3])),
-    'decoder_h1': tf.Variable(tf.random_normal([feature_hidden_3, feature_hidden_2])),
+    #'encoder_h3': tf.Variable(tf.random_normal([feature_hidden_2, feature_hidden_3])),
+    #'decoder_h1': tf.Variable(tf.random_normal([feature_hidden_3, feature_hidden_2])),
     'decoder_h2': tf.Variable(tf.random_normal([feature_hidden_2, feature_hidden_1])),
     'decoder_h3': tf.Variable(tf.random_normal([feature_hidden_1, feature_input])),
 }
 biases_layers = {
     'encoder_b1': tf.Variable(tf.random_normal([feature_hidden_1])),
     'encoder_b2': tf.Variable(tf.random_normal([feature_hidden_2])),
-    'encoder_b3': tf.Variable(tf.random_normal([feature_hidden_3])),
-    'decoder_b1': tf.Variable(tf.random_normal([feature_hidden_2])),
+    #'encoder_b3': tf.Variable(tf.random_normal([feature_hidden_3])),
+    #'decoder_b1': tf.Variable(tf.random_normal([feature_hidden_2])),
     'decoder_b2': tf.Variable(tf.random_normal([feature_hidden_1])),
     'decoder_b3': tf.Variable(tf.random_normal([feature_input])),
 }
@@ -43,16 +43,16 @@ def encoder_sigmoid(x):
     # Encoder Hidden layer with sigmoid activation #2
     layer_2 = tf.nn.sigmoid(tf.add(tf.matmul(layer_1, weights_layers['encoder_h2']), biases_layers['encoder_b2']))
     # Encoder Hidden layer with sigmoid activation #3
-    layer_3 = tf.nn.sigmoid(tf.add(tf.matmul(layer_2, weights_layers['encoder_h3']), biases_layers['encoder_b3']))
+    #layer_3 = tf.nn.sigmoid(tf.add(tf.matmul(layer_2, weights_layers['encoder_h3']), biases_layers['encoder_b3']))
 
-    return layer_3
+    return layer_2
 
 # sigmoid decoder with layers
 def decoder_sigmoid(x):
     # Hidden layer with sigmoid activation #1
-    layer_1 = tf.nn.sigmoid(tf.add(tf.matmul(x, weights_layers['decoder_h1']), biases_layers['decoder_b1']))
+    #layer_1 = tf.nn.sigmoid(tf.add(tf.matmul(x, weights_layers['decoder_h1']), biases_layers['decoder_b1']))
     # Hidden layer with sigmoid activation #2
-    layer_2 = tf.nn.sigmoid(tf.add(tf.matmul(layer_1, weights_layers['decoder_h2']), biases_layers['decoder_b2']))
+    layer_2 = tf.nn.sigmoid(tf.add(tf.matmul(x, weights_layers['decoder_h2']), biases_layers['decoder_b2']))
     # Hidden layer with sigmoid activation #3
     layer_3 = tf.nn.sigmoid(tf.add(tf.matmul(layer_2, weights_layers['decoder_h3']), biases_layers['decoder_b3']))
     return layer_3
@@ -64,23 +64,23 @@ def encoder_tanh(x):
     # Hidden layer with tanh activation #2
     layer_2 = tf.nn.tanh(tf.add(tf.matmul(layer_1, weights_layers['encoder_h2']), biases_layers['encoder_b2']))
     # Hidden layer with tanh activation #3
-    layer_3 = tf.nn.tanh(tf.add(tf.matmul(layer_2, weights_layers['encoder_h3']), biases_layers['encoder_b3']))
-    return layer_3
+    #layer_3 = tf.nn.tanh(tf.add(tf.matmul(layer_2, weights_layers['encoder_h3']), biases_layers['encoder_b3']))
+    return layer_2
 
 #tanh decoder with layers
 def decoder_tanh(x):
     # Hidden layer with tanh activation #1
-    layer_1 = tf.nn.tanh(tf.add(tf.matmul(x, weights_layers['decoder_h1']), biases_layers['decoder_b1']))
+    #layer_1 = tf.nn.tanh(tf.add(tf.matmul(x, weights_layers['decoder_h1']), biases_layers['decoder_b1']))
     # Hidden layer with tanh activation #1
-    layer_2 = tf.nn.tanh(tf.add(tf.matmul(layer_1, weights_layers['decoder_h2']), biases_layers['decoder_b2']))
+    layer_2 = tf.nn.tanh(tf.add(tf.matmul(x, weights_layers['decoder_h2']), biases_layers['decoder_b2']))
     # Hidden layer with tanh activation #1
     layer_3 = tf.nn.tanh(tf.add(tf.matmul(layer_2, weights_layers['decoder_h3']), biases_layers['decoder_b3']))
     return layer_3
 
 # Construct model
-encoder_op = encoder_tanh(X)
+encoder_op = encoder_sigmoid(X)
 # put encoder result in decoder operation
-decoder_op = decoder_tanh(encoder_op)
+decoder_op = decoder_sigmoid(encoder_op)
 
 # Prediction
 y_pred = decoder_op
@@ -91,14 +91,13 @@ y_true = X
 # Training Parameters
 learning_rate = 0.01
 num_steps = 32000
-batch_size = 512
+batch_size = 1024
 
-display_step = 1000
+display_step = 4000
 examples_to_show = 10
 
 
 # Define loss and optimizer, minimize the squared error
-# loss function can be changed.
 loss = tf.reduce_mean(tf.pow(y_true - y_pred, 2))
 optimizer = tf.train.RMSPropOptimizer(learning_rate).minimize(loss)
 
@@ -164,6 +163,7 @@ Total memory: 8.00GiB
 
 
 Experiment 1:
+hidden layers: 3
 learning_rate = 0.01
 num_steps = 32000
 batch_size = 1024
@@ -190,6 +190,34 @@ Step 20000: Minibatch Loss: 0.062675
 Step 24000: Minibatch Loss: 0.059845
 Step 28000: Minibatch Loss: 0.056680
 Step 32000: Minibatch Loss: 0.057008
+
+Experiment 2:
+Hidden Layers: 2
+learning_rate = 0.01
+num_steps = 32000
+batch_size = 1024
+display_step = 4000
+with Tanh function:
+Step 1: Minibatch Loss: 1.059582
+Step 4000: Minibatch Loss: 0.822155
+Step 8000: Minibatch Loss: 0.837025
+Step 12000: Minibatch Loss: 0.830645
+Step 16000: Minibatch Loss: 0.839630
+Step 20000: Minibatch Loss: 0.833946
+Step 24000: Minibatch Loss: 0.835188
+Step 28000: Minibatch Loss: 0.835814
+Step 32000: Minibatch Loss: 0.840790
+
+With Sigmoid function:
+Step 1: Minibatch Loss: 0.441761
+Step 4000: Minibatch Loss: 0.080552
+Step 8000: Minibatch Loss: 0.069778
+Step 12000: Minibatch Loss: 0.063971
+Step 16000: Minibatch Loss: 0.058334
+Step 20000: Minibatch Loss: 0.052234
+Step 24000: Minibatch Loss: 0.050157
+Step 28000: Minibatch Loss: 0.046284
+Step 32000: Minibatch Loss: 0.042556
 
 
 
