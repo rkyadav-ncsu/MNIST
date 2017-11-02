@@ -8,8 +8,6 @@ import matplotlib.pyplot as plt
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
 
-
-
 # Network Parameters
 feature_hidden_1 = 256 # 1st layer features
 feature_hidden_2 = 128 # 2nd layer features
@@ -89,7 +87,7 @@ y_true = X
 
 
 # Training Parameters
-learning_rate = 0.01
+learning_rate = 0.03
 num_steps = 32000
 batch_size = 1024
 
@@ -99,6 +97,12 @@ examples_to_show = 10
 
 # Define loss and optimizer, minimize the squared error
 loss = tf.reduce_mean(tf.pow(y_true - y_pred, 2))
+
+
+# L2 regularization starts
+    #regularizer = tf.nn.l2_loss(weights_layers)
+    #loss = tf.reduce_mean(loss+0.01*regularizer)
+# L2 regularization ends
 optimizer = tf.train.RMSPropOptimizer(learning_rate).minimize(loss)
 
 # Initialize the variables (i.e. assign their default value)
@@ -114,14 +118,14 @@ with tf.Session() as sess:
     # Training
     for i in range(1, num_steps+1):
         # Prepare Data
-        # Get the next batch of MNIST data (only images are needed, not labels)
+        # only images, not labels.
         batch_x, _ = mnist.train.next_batch(batch_size)
 
         # Run optimization op (backprop) and cost op (to get loss value)
         _, l = sess.run([optimizer, loss], feed_dict={X: batch_x})
         # Display logs per step
         if i % display_step == 0 or i == 1:
-            print('Step %i: Minibatch Loss: %f' % (i, l))
+            print('Step %i:  Loss: %f' % (i, l))
 
     # Testing
     # Encode and decode images from test set and visualize their reconstruction.
@@ -145,12 +149,12 @@ with tf.Session() as sess:
             canvas_recon[i * 28:(i + 1) * 28, j * 28:(j + 1) * 28] = \
                 g[j].reshape([28, 28])
 
-    print("Original Images")
+    ##print("Original Images")
     plt.figure(figsize=(n, n))
     plt.imshow(canvas_orig, origin="upper", cmap="gray")
     plt.show()
 
-    print("Reconstructed Images")
+    ##print("Reconstructed Images")
     plt.figure(figsize=(n, n))
     plt.imshow(canvas_recon, origin="upper", cmap="gray")
 plt.show()
@@ -180,6 +184,7 @@ Step 24000: Minibatch Loss: 0.858948
 Step 28000: Minibatch Loss: 0.861257
 Step 32000: Minibatch Loss: 0.857677
 
+
 With Sigmoid function:
 Step 1: Minibatch Loss: 0.450492
 Step 4000: Minibatch Loss: 0.095716
@@ -197,6 +202,7 @@ learning_rate = 0.01
 num_steps = 32000
 batch_size = 1024
 display_step = 4000
+
 with Tanh function:
 Step 1: Minibatch Loss: 1.059582
 Step 4000: Minibatch Loss: 0.822155
@@ -219,6 +225,28 @@ Step 24000: Minibatch Loss: 0.050157
 Step 28000: Minibatch Loss: 0.046284
 Step 32000: Minibatch Loss: 0.042556
 
+With Sigmoid function
+learning rate: 0.003
+Step 1: Minibatch Loss: 0.452981
+Step 4000: Minibatch Loss: 0.101089
+Step 8000: Minibatch Loss: 0.082151
+Step 12000: Minibatch Loss: 0.079554
+Step 16000: Minibatch Loss: 0.074535
+Step 20000: Minibatch Loss: 0.072391
+Step 24000: Minibatch Loss: 0.068127
+Step 28000: Minibatch Loss: 0.064220
+Step 32000: Minibatch Loss: 0.060941
+
+L2 regularization beta=0.01
+Step 1: Minibatch Loss: 0.443909
+Step 4000: Minibatch Loss: 0.110516
+Step 8000: Minibatch Loss: 0.090879
+Step 12000: Minibatch Loss: 0.083052
+Step 16000: Minibatch Loss: 0.074495
+Step 20000: Minibatch Loss: 0.066925
+Step 24000: Minibatch Loss: 0.059073
+Step 28000: Minibatch Loss: 0.055735
+Step 32000: Minibatch Loss: 0.053877
 
 
 
